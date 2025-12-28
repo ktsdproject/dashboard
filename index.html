@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รายการวัสดุอุปกรณ์เลือกตั้ง</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --table-header-bg: #2c3e50;
+            --table-header-text: #ffffff;
+            --row-hover: #f1f7fc;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            color: #333;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            /* รูปพื้นหลัง */
+            background-image: url('https://images.unsplash.com/photo-1519750783826-e2420f4d687f?q=80&w=1974&auto=format&fit=crop'); 
+            background-size: cover;
+            background-position: center;
+        }
+
+        .background-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.90); /* เพิ่มความทึบแสงขึ้นเล็กน้อยให้อ่านง่าย */
+            backdrop-filter: blur(3px);
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1200px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #666;
+            padding: 20px;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            white-space: nowrap;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: var(--table-header-bg);
+            color: var(--table-header-text);
+            font-weight: 500;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: var(--row-hover);
+        }
+
+        td:first-child {
+            white-space: normal;
+            min-width: 200px;
+            font-weight: 500;
+        }
+
+        td:nth-child(2), td:nth-child(3) {
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .status-alert { color: #e74c3c; font-weight: bold; }
+        .note-text { font-size: 0.9em; color: #666; }
+
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="background-overlay"></div>
+    </div>
+
+    <div class="container">
+        <h1>📦 รายการวัสดุที่ต้องดำเนินการจัดสรร</h1>
+        
+        <div id="loading" class="loading">กำลังเชื่อมต่อข้อมูลจาก Google Sheets...</div>
+        
+        <div class="table-responsive">
+            <table id="dataTable" style="display: none;">
+                <thead>
+                    <tr id="tableHeader"></tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // ใช้ลิงก์ Google Sheets ที่แปลงเป็น CSV output แล้ว
+        const googleSheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ75RDJdohY6N12_oX9IVC48zBLT3nU4Ym_VJXaaalYcGY9wlSyyXvBOJCfRkzxvVh8BCgCwbnFZc7G/pub?output=csv';
+
+        Papa.parse(googleSheetUrl, {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                renderTable(results.data, results.meta.fields);
+            },
+            error: function(err) {
+                console.error("Error:", err);
+                document.getElementById('loading').innerHTML = "❌ ไม่สามารถดึงข้อมูลได้ <br><small>กรุณาตรวจสอบลิงก์ Google Sheet หรือการเชื่อมต่ออินเทอร์เน็ต</small>";
+            }
+        });
+
+        function renderTable(data, headers) {
+            const table = document.getElementById('dataTable');
+            const thead = document.getElementById('tableHeader');
+            const tbody = document.getElementById('tableBody');
+            const loading = document.getElementById('loading');
+
+            // สร้าง Header
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header;
+                thead.appendChild(th);
+            });
+
+            // สร้าง Rows
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                
+                headers.forEach(headerKey => {
+                    const td = document.createElement('td');
+                    let value = row[headerKey] || "-";
+
+                    td.textContent = value;
+                    
+                    // เพิ่มลูกเล่น: ถ้าคอลัมน์ "ต้องการ" มีค่ามากกว่า 0 ให้เป็นสีแดง
+                    if (headerKey.includes("ต้องการ") && parseInt(value) > 0) {
+                        td.classList.add('status-alert');
+                    }
+                    
+                    // ปรับแต่งคอลัมน์หมายเหตุให้ตัวเล็กลงหน่อย
+                    if (headerKey.includes("หมายเหตุ")) {
+                        td.classList.add('note-text');
+                    }
+
+                    tr.appendChild(td);
+                });
+                
+                tbody.appendChild(tr);
+            });
+
+            loading.style.display = 'none';
+            table.style.display = 'table';
+        }
+    </script>
+</body>
+</html>
