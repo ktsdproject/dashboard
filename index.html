@@ -3,210 +3,330 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>รายการวัสดุอุปกรณ์เลือกตั้ง</title>
+    <title>Dashboard บริหารจัดการเลือกตั้ง</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 
     <style>
         :root {
-            --primary-color: #2c3e50;
-            --accent-color: #3498db;
-            --table-header-bg: #2c3e50;
-            --table-header-text: #ffffff;
-            --row-hover: #f1f7fc;
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
         }
 
         body {
             font-family: 'Sarabun', sans-serif;
+            background-color: var(--bg-color);
             margin: 0;
-            padding: 0;
-            min-height: 100vh;
+            padding: 20px;
             color: #333;
-            background-color: #f4f4f4;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
         }
 
-        .background-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            /* รูปพื้นหลัง */
-            background-image: url('https://images.unsplash.com/photo-1519750783826-e2420f4d687f?q=80&w=1974&auto=format&fit=crop'); 
-            background-size: cover;
-            background-position: center;
-        }
-
-        .background-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.90); /* เพิ่มความทึบแสงขึ้นเล็กน้อยให้อ่านง่าย */
-            backdrop-filter: blur(3px);
+        /* พื้นหลัง */
+        .bg-image {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: url('https://images.unsplash.com/photo-1519750783826-e2420f4d687f?q=80&w=1974') center/cover;
+            opacity: 0.1;
         }
 
         .container {
-            width: 95%;
             max-width: 1200px;
-            margin: 40px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            position: relative;
+            margin: 0 auto;
         }
 
         h1 {
             text-align: center;
-            color: var(--primary-color);
-            margin-bottom: 30px;
+            color: var(--primary);
+            margin-bottom: 25px;
+            text-shadow: 1px 1px 0px white;
+        }
+
+        /* --- Tabs (ปุ่มเลือกหน้า) --- */
+        .tabs-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 25px;
+            gap: 15px;
+        }
+
+        .tab-btn {
+            padding: 12px 25px;
+            font-family: 'Sarabun', sans-serif;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 50px;
+            background: white;
+            color: #7f8c8d;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
             font-weight: 600;
         }
 
-        .loading {
-            text-align: center;
-            font-size: 1.2rem;
-            color: #666;
-            padding: 20px;
+        .tab-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
+        
+        .tab-btn.active {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.4);
         }
 
-        .table-responsive {
-            overflow-x: auto;
-            border-radius: 8px;
-            border: 1px solid #eee;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            white-space: nowrap;
-        }
-
-        th, td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-
-        th {
-            background-color: var(--table-header-bg);
-            color: var(--table-header-text);
-            font-weight: 500;
-            position: sticky;
-            top: 0;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-
-        tr:hover {
-            background-color: var(--row-hover);
-        }
-
-        td:first-child {
-            white-space: normal;
-            min-width: 200px;
-            font-weight: 500;
-        }
-
-        td:nth-child(2), td:nth-child(3) {
-            text-align: center;
-            font-weight: 600;
+        /* --- Content Area --- */
+        .content-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            display: none; /* ซ่อนไว้ก่อน */
+            animation: slideUp 0.4s ease-out;
         }
         
-        .status-alert { color: #e74c3c; font-weight: bold; }
-        .note-text { font-size: 0.9em; color: #666; }
+        .content-card.active { display: block; }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- Table Styling --- */
+        .table-responsive { overflow-x: auto; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 600px; }
+        
+        th { 
+            background: var(--secondary); 
+            color: white; 
+            padding: 15px; 
+            text-align: left; 
+            font-weight: 500;
+            border-radius: 5px 5px 0 0;
+        }
+        
+        td { padding: 14px 15px; border-bottom: 1px solid #eee; vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background-color: #f8f9fa; }
+
+        /* --- Tab 1: วัสดุ (ตัวเลข) --- */
+        .badge-alert {
+            background-color: rgba(231, 76, 60, 0.15);
+            color: var(--danger);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .text-dim { color: #95a5a6; font-size: 0.9em; }
+
+        /* --- Tab 2: Progress Bar Styling --- */
+        .progress-container {
+            width: 100%;
+            background-color: #ecf0f1;
+            border-radius: 10px;
+            height: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 10px;
+            text-align: right;
+            transition: width 0.6s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .progress-text {
+            font-size: 0.75rem;
+            color: white;
+            padding-right: 8px;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        /* สีของ Progress bar ตาม % */
+        .bar-low { background: var(--danger); }    /* 0-30% สีแดง */
+        .bar-mid { background: var(--warning); }   /* 31-70% สีส้ม */
+        .bar-high { background: var(--success); }  /* 71-100% สีเขียว */
+
+        .loading-text { text-align: center; padding: 30px; color: #7f8c8d; }
 
     </style>
 </head>
 <body>
 
-    <div class="background-container">
-        <div class="background-overlay"></div>
-    </div>
+    <div class="bg-image"></div>
 
     <div class="container">
-        <h1>📦 รายการวัสดุที่ต้องดำเนินการจัดสรร</h1>
-        
-        <div id="loading" class="loading">กำลังเชื่อมต่อข้อมูลจาก Google Sheets...</div>
-        
-        <div class="table-responsive">
-            <table id="dataTable" style="display: none;">
-                <thead>
-                    <tr id="tableHeader"></tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
+        <h1>📦 Dashboard ติดตามงานและวัสดุ</h1>
+
+        <div class="tabs-container">
+            <button class="tab-btn active" onclick="switchTab('tab-material', this)">
+                📝 รายการวัสดุอุปกรณ์
+            </button>
+            <button class="tab-btn" onclick="switchTab('tab-activity', this)">
+                📊 ความคืบหน้ากิจกรรม
+            </button>
+        </div>
+
+        <div id="tab-material" class="content-card active">
+            <h3 style="margin-top:0;">สรุปรายการวัสดุ</h3>
+            <div id="loading1" class="loading-text">กำลังโหลดข้อมูล...</div>
+            <div class="table-responsive">
+                <table id="table-material">
+                    <thead>
+                        <tr>
+                            <th style="width: 40%">รายการ</th>
+                            <th style="width: 15%; text-align:center;">มีอยู่</th>
+                            <th style="width: 15%; text-align:center;">ต้องการเพิ่ม</th>
+                            <th style="width: 10%; text-align:center;">หน่วย</th>
+                            <th>หมายเหตุ</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="tab-activity" class="content-card">
+            <h3 style="margin-top:0;">สถานะการดำเนินการ</h3>
+            <div id="loading2" class="loading-text">กำลังโหลดข้อมูล...</div>
+            <div class="table-responsive">
+                <table id="table-activity">
+                    <thead>
+                        <tr>
+                            <th style="width: 50%">กิจกรรม / รายการ</th>
+                            <th style="width: 20%">หมายเหตุ</th>
+                            <th style="width: 30%">ความคืบหน้า</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
     <script>
-        // ใช้ลิงก์ Google Sheets ที่แปลงเป็น CSV output แล้ว
-        const googleSheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ75RDJdohY6N12_oX9IVC48zBLT3nU4Ym_VJXaaalYcGY9wlSyyXvBOJCfRkzxvVh8BCgCwbnFZc7G/pub?output=csv';
+        // ============================================
+        // 🔗 ตั้งค่าลิงก์ Google Sheets CSV ตรงนี้
+        // ============================================
+        
+        // 1. ลิงก์วัสดุ (Sheet 1)
+        const URL_MATERIAL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ75RDJdohY6N12_oX9IVC48zBLT3nU4Ym_VJXaaalYcGY9wlSyyXvBOJCfRkzxvVh8BCgCwbnFZc7G/pub?output=csv';
 
-        Papa.parse(googleSheetUrl, {
-            download: true,
-            header: true,
-            skipEmptyLines: true,
-            complete: function(results) {
-                renderTable(results.data, results.meta.fields);
-            },
-            error: function(err) {
-                console.error("Error:", err);
-                document.getElementById('loading').innerHTML = "❌ ไม่สามารถดึงข้อมูลได้ <br><small>กรุณาตรวจสอบลิงก์ Google Sheet หรือการเชื่อมต่ออินเทอร์เน็ต</small>";
-            }
+        // 2. ลิงก์กิจกรรม (Sheet 2) - **อย่าลืมเอาลิงก์ใหม่มาใส่นะครับ**
+        const URL_ACTIVITY = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ75RDJdohY6N12_oX9IVC48zBLT3nU4Ym_VJXaaalYcGY9wlSyyXvBOJCfRkzxvVh8BCgCwbnFZc7G/pub?output=csv'; 
+
+        // ============================================
+
+        // ฟังก์ชันโหลดข้อมูลหลัก
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMaterialData();
+            loadActivityData();
         });
 
-        function renderTable(data, headers) {
-            const table = document.getElementById('dataTable');
-            const thead = document.getElementById('tableHeader');
-            const tbody = document.getElementById('tableBody');
-            const loading = document.getElementById('loading');
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.content-card').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
+        }
 
-            // สร้าง Header
-            headers.forEach(header => {
-                const th = document.createElement('th');
-                th.textContent = header;
-                thead.appendChild(th);
+        // --- 1. โหลดและแสดงผล: วัสดุ ---
+        function loadMaterialData() {
+            Papa.parse(URL_MATERIAL, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    renderMaterialTable(results.data);
+                },
+                error: () => document.getElementById('loading1').innerHTML = "❌ โหลดข้อมูลล้มเหลว"
             });
+        }
 
-            // สร้าง Rows
+        function renderMaterialTable(data) {
+            const tbody = document.querySelector('#table-material tbody');
+            document.getElementById('loading1').style.display = 'none';
+            tbody.innerHTML = '';
+
             data.forEach(row => {
+                const item = row['รายการ'] || '-';
+                const current = row['มีอยู่'] || '0';
+                const need = row['ต้องการเพิ่มอีก'] || '0'; // ใช้ชื่อคอลัมน์ตามไฟล์ CSV ของคุณ
+                const unit = row['หน่วยนับ'] || '';
+                const note = row['หมายเหตุ'] || '';
+
                 const tr = document.createElement('tr');
                 
-                headers.forEach(headerKey => {
-                    const td = document.createElement('td');
-                    let value = row[headerKey] || "-";
+                // เช็คว่าต้องการเพิ่มหรือไม่ ถ้า > 0 ให้แดง
+                let needHtml = need;
+                if(parseInt(need) > 0) {
+                    needHtml = `<span class="badge-alert">${need}</span>`;
+                }
 
-                    td.textContent = value;
-                    
-                    // เพิ่มลูกเล่น: ถ้าคอลัมน์ "ต้องการ" มีค่ามากกว่า 0 ให้เป็นสีแดง
-                    if (headerKey.includes("ต้องการ") && parseInt(value) > 0) {
-                        td.classList.add('status-alert');
-                    }
-                    
-                    // ปรับแต่งคอลัมน์หมายเหตุให้ตัวเล็กลงหน่อย
-                    if (headerKey.includes("หมายเหตุ")) {
-                        td.classList.add('note-text');
-                    }
-
-                    tr.appendChild(td);
-                });
-                
+                tr.innerHTML = `
+                    <td style="font-weight:500;">${item}</td>
+                    <td style="text-align:center;">${current}</td>
+                    <td style="text-align:center;">${needHtml}</td>
+                    <td style="text-align:center;" class="text-dim">${unit}</td>
+                    <td class="text-dim">${note}</td>
+                `;
                 tbody.appendChild(tr);
             });
+        }
 
-            loading.style.display = 'none';
-            table.style.display = 'table';
+        // --- 2. โหลดและแสดงผล: กิจกรรม (Progress) ---
+        function loadActivityData() {
+            if(URL_ACTIVITY.includes('ใส่ลิงก์')) {
+                document.getElementById('loading2').innerHTML = "⚠️ กรุณาใส่ลิงก์ CSV ของชีทกิจกรรมในโค้ด";
+                return;
+            }
+
+            Papa.parse(URL_ACTIVITY, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    renderActivityTable(results.data);
+                },
+                error: () => document.getElementById('loading2').innerHTML = "❌ โหลดข้อมูลล้มเหลว"
+            });
+        }
+
+        function renderActivityTable(data) {
+            const tbody = document.querySelector('#table-activity tbody');
+            document.getElementById('loading2').style.display = 'none';
+            tbody.innerHTML = '';
+
+            data.forEach(row => {
+                const item = row['รายการ'] || '-';
+                const note = row['หมายเหตุ'] || '-';
+                // ดึงค่า Progress (ชื่อคอลัมน์ต้องตรงเป๊ะ)
+                let progressVal = parseInt(row['การดำเนินการ (0-100%)']) || 0;
+                
+                // กำหนดสี Progress Bar
+                let barClass = 'bar-low';
+                if(progressVal > 30) barClass = 'bar-mid';
+                if(progressVal > 70) barClass = 'bar-high';
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="font-weight:500;">${item}</td>
+                    <td class="text-dim">${note}</td>
+                    <td>
+                        <div class="progress-container">
+                            <div class="progress-bar ${barClass}" style="width: ${progressVal}%">
+                                <span class="progress-text">${progressVal}%</span>
+                            </div>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
         }
     </script>
 </body>
