@@ -11,56 +11,57 @@
     <style>
         :root {
             --primary: #2c3e50;
-            --secondary: #34495e;
             --accent: #3498db;
-            --bg-color: #f0f2f5;
-            --card-bg: #ffffff;
+            --bg-color: #f4f6f8;
+            --danger: #e74c3c;
             --success: #27ae60;
             --warning: #f39c12;
-            --danger: #e74c3c;
+            --text-color: #333;
         }
+
+        /* ตั้งค่า Base Font ให้ปรับตามขนาดจอ */
+        html { font-size: 16px; }
+        @media (max-width: 768px) { html { font-size: 14px; } }
+        @media (max-width: 480px) { html { font-size: 12px; } }
 
         body {
             font-family: 'Sarabun', sans-serif;
             background-color: var(--bg-color);
             margin: 0;
-            padding: 20px;
-            color: #333;
-            line-height: 1.5;
+            padding: 1rem;
+            color: var(--text-color);
         }
 
         /* พื้นหลัง */
-        .bg-image {
+        .bg-fixed {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
             background: url('https://images.unsplash.com/photo-1519750783826-e2420f4d687f?q=80&w=1974') center/cover;
-            opacity: 0.1;
+            opacity: 0.08;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding-bottom: 50px;
+            padding-bottom: 3rem;
         }
 
         h1 {
             text-align: center;
             color: var(--primary);
-            margin-bottom: 25px;
+            margin-bottom: 1.5rem;
             font-size: 1.8rem;
-            text-shadow: 1px 1px 0px white;
         }
 
-        /* --- Tabs (ปุ่มเลือกหน้า) --- */
-        .tabs-container {
+        /* --- Tabs --- */
+        .tabs {
             display: flex;
             justify-content: center;
-            margin-bottom: 25px;
-            gap: 15px;
-            flex-wrap: wrap; /* ให้ปุ่มตกบรรทัดได้ถ้าจอเล็ก */
+            gap: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .tab-btn {
-            padding: 12px 25px;
+            padding: 0.6rem 1.5rem;
             font-family: 'Sarabun', sans-serif;
             font-size: 1rem;
             border: none;
@@ -68,190 +69,131 @@
             background: white;
             color: #7f8c8d;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
-            font-weight: 600;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: 0.3s;
         }
 
-        .tab-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
-        
         .tab-btn.active {
             background: var(--accent);
             color: white;
+            font-weight: bold;
             box-shadow: 0 4px 10px rgba(52, 152, 219, 0.4);
         }
 
-        /* --- Content Area --- */
-        .content-card {
-            background: var(--card-bg);
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        /* --- Content & Table --- */
+        .content-area {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
             display: none;
-            animation: slideUp 0.4s ease-out;
         }
-        
-        .content-card.active { display: block; }
-        .content-header { margin-top: 0; font-size: 1.4rem; color: var(--secondary); margin-bottom: 20px; }
+        .content-area.active { display: block; }
 
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto; /* เผื่อกรณีจอเล็กมากๆ จริงๆ */
+        }
 
-        /* --- Table Styling (Desktop) --- */
-        .table-wrapper { width: 100%; overflow-x: auto; }
-        
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
-        
-        th { 
-            background: var(--secondary); 
-            color: white; 
-            padding: 15px; 
-            text-align: left; 
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed; /* 👈 บังคับความกว้างคอลัมน์ให้คงที่ */
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            padding: 0.8rem;
+            text-align: left;
             font-weight: 500;
+            font-size: 0.95rem;
+            white-space: nowrap; /* หัวตารางห้ามตัดคำ */
         }
-        
-        th:first-child { border-top-left-radius: 8px; }
-        th:last-child { border-top-right-radius: 8px; }
 
-        td { padding: 14px 15px; border-bottom: 1px solid #eee; vertical-align: middle; }
-        tr:last-child td { border-bottom: none; }
-        tr:hover { background-color: #f8f9fa; }
+        td {
+            padding: 0.8rem;
+            border-bottom: 1px solid #eee;
+            font-size: 0.95rem;
+            vertical-align: top; /* ให้ข้อความเริ่มจากด้านบนเสมอ */
+            
+            /* 🔽 หัวใจสำคัญ: การตัดคำ */
+            word-wrap: break-word;      
+            word-break: break-word;     
+            white-space: normal;        
+        }
 
-        /* Badge & Progress */
-        .badge-alert {
-            background-color: rgba(231, 76, 60, 0.15);
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        tr:hover { background-color: #f0f4f8; }
+
+        /* การจัดแต่งพิเศษ */
+        .status-alert {
             color: var(--danger);
-            padding: 4px 8px;
-            border-radius: 4px;
             font-weight: bold;
+            background: rgba(231, 76, 60, 0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
             display: inline-block;
         }
-        .text-dim { color: #95a5a6; font-size: 0.9em; }
 
-        .progress-container {
-            width: 100%;
-            background-color: #ecf0f1;
+        .text-center { text-align: center; }
+        .text-dim { color: #999; font-size: 0.85rem; }
+
+        /* --- Progress Bar --- */
+        .progress-track {
+            background: #ecf0f1;
             border-radius: 10px;
-            height: 20px;
+            height: 1.2rem;
+            width: 100%;
             overflow: hidden;
         }
-        .progress-bar {
+        .progress-fill {
             height: 100%;
-            border-radius: 10px;
             text-align: right;
-            transition: width 0.6s ease;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-        }
-        .progress-text {
-            font-size: 0.75rem;
+            padding-right: 5px;
             color: white;
-            padding-right: 8px;
+            font-size: 0.75rem;
             font-weight: bold;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            line-height: 1.2rem;
+            transition: width 0.5s;
         }
-        .bar-low { background: var(--danger); }
-        .bar-mid { background: var(--warning); }
-        .bar-high { background: var(--success); }
-        
-        .loading-text { text-align: center; padding: 40px; color: #7f8c8d; }
+        .bg-red { background: var(--danger); }
+        .bg-orange { background: var(--warning); }
+        .bg-green { background: var(--success); }
 
-        /* =========================================
-           📱 MOBILE RESPONSIVE STYLES (Card View)
-           ========================================= */
-        @media screen and (max-width: 768px) {
-            body { padding: 10px; }
-            .container { padding-bottom: 20px; }
-            h1 { font-size: 1.5rem; }
-            .content-card { padding: 15px; }
-            
-            /* ซ่อนหัวตาราง */
-            table thead { display: none; }
-            
-            table, table tbody, table tr, table td { display: block; width: 100%; box-sizing: border-box; }
-            
-            /* เปลี่ยนแถวให้เป็นกล่องการ์ด */
-            table tr {
-                margin-bottom: 15px;
-                background: #fff;
-                border: 1px solid #e1e1e1;
-                border-radius: 10px;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-                overflow: hidden;
-            }
-
-            /* จัดการแต่ละเซลล์ */
-            table td {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                text-align: right;
-                padding: 12px 15px;
-                border-bottom: 1px solid #f0f0f0;
-                font-size: 0.95rem;
-            }
-
-            table td:last-child { border-bottom: none; }
-
-            /* สร้างหัวข้อเทียม (Label) ด้านซ้าย */
-            table td::before {
-                content: attr(data-label);
-                font-weight: 600;
-                color: var(--secondary);
-                text-align: left;
-                margin-right: 15px;
-                min-width: 100px; /* ความกว้างขั้นต่ำของหัวข้อ */
-            }
-
-            /* ปรับแต่งพิเศษสำหรับชื่อรายการ (บรรทัดแรกของการ์ด) */
-            table td[data-label="รายการ"], 
-            table td[data-label="กิจกรรม"] {
-                background-color: #f8f9fa;
-                color: var(--primary);
-                font-weight: bold;
-                font-size: 1.05rem;
-                display: block;
-                text-align: left;
-            }
-            /* ซ่อน label สำหรับบรรทัดชื่อรายการ เพื่อความสวยงาม */
-            table td[data-label="รายการ"]::before, 
-            table td[data-label="กิจกรรม"]::before {
-                display: none;
-            }
-
-            /* ปรับ Progress Bar ในมือถือ */
-            .progress-container { width: 60%; } /* ให้แถบสั้นลงหน่อยจะได้ไม่เบียด */
+        /* ปรับแต่งคอลัมน์เฉพาะ Mobile */
+        @media (max-width: 600px) {
+            th, td { padding: 0.5rem; } /* ลด Padding */
+            /* ซ่อนคอลัมน์หมายเหตุในมือถือถ้าต้องการพื้นที่ (Optional) 
+               แต่ตอนนี้ปล่อยให้ตัดคำแทน */
         }
 
     </style>
 </head>
 <body>
 
-    <div class="bg-image"></div>
+    <div class="bg-fixed"></div>
 
     <div class="container">
-        <h1>📦 Dashboard ติดตามงานและวัสดุ</h1>
+        <h1>📦 Dashboard ติดตามงาน</h1>
 
-        <div class="tabs-container">
-            <button class="tab-btn active" onclick="switchTab('tab-material', this)">
-                📝 รายการวัสดุ
-            </button>
-            <button class="tab-btn" onclick="switchTab('tab-activity', this)">
-                📊 ความคืบหน้างาน
-            </button>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('tab1', this)">วัสดุอุปกรณ์</button>
+            <button class="tab-btn" onclick="switchTab('tab2', this)">ความคืบหน้า</button>
         </div>
 
-        <div id="tab-material" class="content-card active">
-            <h3 class="content-header">สรุปรายการวัสดุ</h3>
-            <div id="loading1" class="loading-text">กำลังโหลดข้อมูล...</div>
-            <div class="table-wrapper">
-                <table id="table-material">
+        <div id="tab1" class="content-area active">
+            <div id="loading1" class="text-center">กำลังโหลด...</div>
+            <div class="table-responsive">
+                <table id="table1">
+                    <colgroup>
+                        <col style="width: 40%;"> <col style="width: 15%;"> <col style="width: 15%;"> <col style="width: 15%;"> <col style="width: 15%;"> </colgroup>
                     <thead>
                         <tr>
-                            <th style="width: 40%">รายการ</th>
-                            <th style="width: 15%; text-align:center;">มีอยู่</th>
-                            <th style="width: 15%; text-align:center;">ต้องการเพิ่ม</th>
-                            <th style="width: 10%; text-align:center;">หน่วย</th>
+                            <th>รายการ</th>
+                            <th class="text-center">มีอยู่</th>
+                            <th class="text-center">ขาด</th>
+                            <th class="text-center">หน่วย</th>
                             <th>หมายเหตุ</th>
                         </tr>
                     </thead>
@@ -260,16 +202,17 @@
             </div>
         </div>
 
-        <div id="tab-activity" class="content-card">
-            <h3 class="content-header">สถานะการดำเนินการ</h3>
-            <div id="loading2" class="loading-text">กำลังโหลดข้อมูล...</div>
-            <div class="table-wrapper">
-                <table id="table-activity">
+        <div id="tab2" class="content-area">
+            <div id="loading2" class="text-center">กำลังโหลด...</div>
+            <div class="table-responsive">
+                <table id="table2">
+                    <colgroup>
+                        <col style="width: 50%;"> <col style="width: 20%;"> <col style="width: 30%;"> </colgroup>
                     <thead>
                         <tr>
-                            <th style="width: 50%">กิจกรรม / รายการ</th>
-                            <th style="width: 20%">หมายเหตุ</th>
-                            <th style="width: 30%">ความคืบหน้า</th>
+                            <th>กิจกรรม</th>
+                            <th>หมายเหตุ</th>
+                            <th>ความคืบหน้า</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -280,106 +223,94 @@
 
     <script>
         // ============================================
-        // 🔗 ตั้งค่าลิงก์ Google Sheets CSV
+        // 🔗 ใส่ลิงก์ CSV ตรงนี้เหมือนเดิมครับ
         // ============================================
         
-        // 1. ลิงก์วัสดุ (Sheet 1)
         const URL_MATERIAL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ75RDJdohY6N12_oX9IVC48zBLT3nU4Ym_VJXaaalYcGY9wlSyyXvBOJCfRkzxvVh8BCgCwbnFZc7G/pub?gid=416405025&single=true&output=csv';
-
-        // 2. ลิงก์กิจกรรม (Sheet 2) - **อย่าลืมเอาลิงก์ใหม่มาใส่นะครับ**
         const URL_ACTIVITY = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ75RDJdohY6N12_oX9IVC48zBLT3nU4Ym_VJXaaalYcGY9wlSyyXvBOJCfRkzxvVh8BCgCwbnFZc7G/pub?gid=1666533702&single=true&output=csv'; 
 
         // ============================================
 
         document.addEventListener('DOMContentLoaded', () => {
-            loadMaterialData();
-            loadActivityData();
+            loadMaterial();
+            loadActivity();
         });
 
-        function switchTab(tabId, btn) {
-            document.querySelectorAll('.content-card').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
+        function switchTab(id, btn) {
+            document.querySelectorAll('.content-area').forEach(e => e.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(e => e.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
             btn.classList.add('active');
         }
 
-        // --- Tab 1: วัสดุ ---
-        function loadMaterialData() {
+        // --- โหลดข้อมูลวัสดุ ---
+        function loadMaterial() {
             Papa.parse(URL_MATERIAL, {
                 download: true, header: true, skipEmptyLines: true,
-                complete: function(results) { renderMaterialTable(results.data); },
-                error: () => document.getElementById('loading1').innerHTML = "❌ โหลดข้อมูลล้มเหลว"
+                complete: function(results) {
+                    const tbody = document.querySelector('#table1 tbody');
+                    document.getElementById('loading1').style.display = 'none';
+                    tbody.innerHTML = '';
+
+                    results.data.forEach(row => {
+                        const item = row['รายการ'] || '-';
+                        const have = row['มีอยู่'] || '-';
+                        const want = row['ต้องการเพิ่มอีก'] || '0';
+                        const unit = row['หน่วยนับ'] || '';
+                        const note = row['หมายเหตุ'] || '';
+
+                        let wantDisplay = want;
+                        if(parseInt(want) > 0) wantDisplay = `<span class="status-alert">${want}</span>`;
+
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${item}</td>
+                            <td class="text-center">${have}</td>
+                            <td class="text-center">${wantDisplay}</td>
+                            <td class="text-center text-dim">${unit}</td>
+                            <td class="text-dim">${note}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
             });
         }
 
-        function renderMaterialTable(data) {
-            const tbody = document.querySelector('#table-material tbody');
-            document.getElementById('loading1').style.display = 'none';
-            tbody.innerHTML = '';
+        // --- โหลดข้อมูลกิจกรรม ---
+        function loadActivity() {
+            if(URL_ACTIVITY.includes('ใส่ลิงก์')) return;
 
-            data.forEach(row => {
-                const item = row['รายการ'] || '-';
-                const current = row['มีอยู่'] || '0';
-                const need = row['ต้องการเพิ่มอีก'] || '0';
-                const unit = row['หน่วยนับ'] || '';
-                const note = row['หมายเหตุ'] || '-';
-
-                const tr = document.createElement('tr');
-                let needHtml = need;
-                if(parseInt(need) > 0) needHtml = `<span class="badge-alert">${need}</span>`;
-
-                // data-label จำเป็นสำหรับ Mobile View
-                tr.innerHTML = `
-                    <td data-label="รายการ">${item}</td>
-                    <td data-label="มีอยู่" style="text-align:center;">${current}</td>
-                    <td data-label="ต้องการเพิ่ม" style="text-align:center;">${needHtml}</td>
-                    <td data-label="หน่วย" style="text-align:center;" class="text-dim">${unit}</td>
-                    <td data-label="หมายเหตุ" class="text-dim">${note}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        // --- Tab 2: กิจกรรม ---
-        function loadActivityData() {
-            if(URL_ACTIVITY.includes('ใส่ลิงก์')) {
-                document.getElementById('loading2').innerHTML = "⚠️ ใส่ลิงก์ CSV ชีทที่ 2 ในโค้ดก่อนครับ";
-                return;
-            }
             Papa.parse(URL_ACTIVITY, {
                 download: true, header: true, skipEmptyLines: true,
-                complete: function(results) { renderActivityTable(results.data); },
-                error: () => document.getElementById('loading2').innerHTML = "❌ โหลดข้อมูลล้มเหลว"
-            });
-        }
+                complete: function(results) {
+                    const tbody = document.querySelector('#table2 tbody');
+                    document.getElementById('loading2').style.display = 'none';
+                    tbody.innerHTML = '';
 
-        function renderActivityTable(data) {
-            const tbody = document.querySelector('#table-activity tbody');
-            document.getElementById('loading2').style.display = 'none';
-            tbody.innerHTML = '';
+                    results.data.forEach(row => {
+                        const item = row['รายการ'] || '-';
+                        const note = row['หมายเหตุ'] || '-';
+                        let percent = parseInt(row['การดำเนินการ (0-100%)']) || 0;
 
-            data.forEach(row => {
-                const item = row['รายการ'] || '-';
-                const note = row['หมายเหตุ'] || '-';
-                let progressVal = parseInt(row['การดำเนินการ (0-100%)']) || 0;
-                
-                let barClass = 'bar-low';
-                if(progressVal > 30) barClass = 'bar-mid';
-                if(progressVal > 70) barClass = 'bar-high';
+                        let colorClass = 'bg-red';
+                        if(percent > 30) colorClass = 'bg-orange';
+                        if(percent > 70) colorClass = 'bg-green';
 
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td data-label="กิจกรรม">${item}</td>
-                    <td data-label="หมายเหตุ" class="text-dim">${note}</td>
-                    <td data-label="ความคืบหน้า">
-                        <div class="progress-container">
-                            <div class="progress-bar ${barClass}" style="width: ${progressVal}%">
-                                <span class="progress-text">${progressVal}%</span>
-                            </div>
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(tr);
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${item}</td>
+                            <td class="text-dim">${note}</td>
+                            <td>
+                                <div class="progress-track">
+                                    <div class="progress-fill ${colorClass}" style="width: ${percent}%">
+                                        ${percent}%
+                                    </div>
+                                </div>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
             });
         }
     </script>
